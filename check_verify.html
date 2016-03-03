@@ -1,0 +1,177 @@
+<!doctype html>
+<html ng-app="listome">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	    <title>智慧工厂</title>
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/static/bootstrap-3.3.5/css/bootstrap.min.css" />
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/app/static/js/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/app/static/css/base.css" />
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/app/static/js/fullcalendar-2.4.0/fullcalendar.min.css" />
+	    <!-- <link rel="stylesheet" type="text/css" href="/app/static/js/fullcalendar-2.4.0/fullcalendar.print.css" /> -->
+
+	    <script type="text/javascript" src="http://libs.useso.com/js/jquery/2.1.1/jquery.min.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/jquery-total-storage/jquery.total-storage.min.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/moment-2.10.6/moment.min.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/fullcalendar-2.4.0/fullcalendar.min.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/fullcalendar-2.4.0/lang/zh-cn.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/layer.m/layer.m.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/base.js"></script>
+	    <style type="text/css">
+	    i{
+	    	color:#999;
+	    }
+	    </style>
+	</head>
+	<body>
+		<div class="container" id="header" style="position:fixed;right:0;left:0;z-index:1030;">
+			<div class="row" style="margin-bottom:20px;height:50px;background-color:rgba(120,180,165,0.95);line-height:50px; color:#fff;">
+				<div class="col-xs-2">
+					<span class="glyphicon glyphicon-remove" id="close_window" style="line-height:50px;"></span>
+				</div>
+				<div class="col-xs-8 text-center" style="line-height:50px;font-weight:600;font-size:20px;">
+					打卡确认
+				</div>
+			</div>
+		</div>
+		<div class="container" style="padding-top:60px;padding-bottom:50px;" id="list">
+		</div>
+		<nav class="navbar navbar-default navbar-fixed-bottom">
+			<div class="container" style="margin-top:10px;">
+				<div class="btn-group btn-group-justified" role="group" aria-label="navbar">
+				&nbsp;
+			    </div>
+			</div>
+		</nav>
+		<script type="text/javascript" src="/app/static/js/common.js"></script>
+		<script type="text/javascript">
+			
+			$('.glyphicon-plus').on('click',function(){
+				$(this).css('color','#ddd');
+			});
+			//底部导航
+			function navbar(){
+				if (is_boss){
+					var html = '<a href="/app/check_record.html" class="btn btn-success" role="button">打卡记录</a>';
+					$('.btn-group-justified').html(html);
+				}else{
+					var html = '<a href="/app/check_record.html" class="btn btn-success" role="button">打卡记录</a>';
+					$('.btn-group-justified').html(html);
+				}
+			}
+			navbar();
+
+			$.ajax({
+				url:'/v1/companies/users/checkin_records/verify',
+				dataType:"json",
+				method:'GET',
+				async:false,
+				beforeSend:function(request){
+					request.setRequestHeader('Authorization','Bearer '+ token);
+					layer.open({
+						type:2,
+						shade:false,
+					});
+				},
+				success:function(data){
+					layer.closeAll();
+					var html = '';
+					var result = data.data
+					for (k in result){
+						var margin_top = '';
+						if(k > 0){
+							margin_top = 'margin-top:10px;'
+						}
+						html += '<div class="row" style="border-bottom:1px solid #ccc;'+margin_top+'">';
+						html += '<a href="/app/checkin.html?id='+result[k].id+'" style="color:#000;">';
+						html += '<div class="col-xs-3">';
+						html += '<img src="http://api.listome.com/v1/companies/users/checkin_records/pic/'+result[k].id+'" style="width:100%" />';
+						html += '</div>';
+						html += '<div class="col-xs-5">';
+						html += '<h5>'+result[k].user_name+'</h5>';
+						html += '<p>'+unixToTime('yy/MM/dd hh:mm',result[k].check_time)+'</p>'
+						var type = '';
+						switch(result[k].type){
+							case 1:
+								type = '上班';
+								break;
+							case 2:
+								type = '下班';
+								break;
+							case 4:
+								type = '外出';
+								break;
+							case 8:
+								type = '归来';
+								break;
+						}
+						html += '<p>'+type+'打卡</p>';
+						html += '</div>';
+						html += '</a>';
+						html += '<div class="col-xs-3">';
+						html += '<button class="btn btn-success" data-action="verify" data-id="'+result[k].id+'">确认打卡</button>';
+						html += '&nbsp;';
+						html += '<button class="btn btn-danger" data-action="deny" data-id="'+result[k].id+'">不是本人</button>';
+						html += '</div>';
+						html += '</div>';
+					}
+					$('#list').html(html);
+				},
+				error:function(){
+					layer.closeAll();
+					layer.open({
+					    content: '数据加载失败',
+					    btn: ['OK'],
+					});
+				}
+			});
+
+			$('button').each(function(i,e){
+					$(this).bind('click',function(){
+						var action = $(this).data('action')
+						var id = $(this).data('id')
+						var status = -2
+						if (action == 'verify'){
+							status = 2
+						}
+						$.ajax({
+							url:"/v1/companies/users/checkin_records/"+id,
+							method:"PUT",
+							dataType:"json",
+							data:{'status':status},
+							beforeSend:function(request){
+								request.setRequestHeader('Authorization','Bearer '+ token);
+								layer.open({
+									type:2,
+									shade:false,
+								});
+							},
+							success:function(data){
+								layer.closeAll();
+								layer.open({
+								    content: '操作成功',
+								    btn: ['OK'],
+								    yes:function(){
+								    	location.reload();
+								    }
+								});
+							},
+							error:function(){
+								layer.closeAll();
+								layer.open({
+								    content: '操作失败',
+								    btn: ['OK'],
+								    yes:function(){
+								    	location.reload();
+								    }
+								});
+							}
+						});
+					});
+				});
+		</script>
+	</body>
+</html>

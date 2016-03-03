@@ -1,0 +1,75 @@
+<!doctype html>
+<html ng-app="listome">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	    <title>智慧工厂</title>
+	    <script type="text/javascript" src="http://libs.useso.com/js/jquery/2.1.1/jquery.min.js"></script>
+	    <script type="text/javascript" src="/app/static/js/jquery-total-storage/jquery.total-storage.min.js"></script>
+	    <link rel="stylesheet" type="text/css" href="/app/static/bootstrap-3.3.5/css/bootstrap.min.css" />
+	    <style>
+	    	#list a{color:#000;text-decoration: none;display: inline-block;padding: 10px 10px 0px 10px;}
+	    </style>
+	</head>
+	<body>
+		<div class="container" style="margin-top:20px;">
+			<div class="row" id="list">
+				<div class="col-xs-4 col-sm-3 col-md-2">
+					<a href="javascript:openWindow('http://api.listome.com/app/leave_list.html');">
+						<img style="width:100%" src="http://api.listome.com/app/static/img/ic_apply_for_leave.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">请假申请</p>
+					</a>
+				</div>
+				<div class="col-xs-4 col-sm-3 col-md-2">
+					<a href="javascript:openWindow('http://api.listome.com/app/overtime_list.html');">
+						<img style="width:100%" src="http://api.listome.com/app/static/img/ic_apply_for_extra_work.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">加班申请</p>
+					</a>
+				</div>
+				<div class="col-xs-4 col-sm-3 col-md-2">
+					<a href="javascript:openWindow('http://api.listome.com/app/check_record.html');">
+						<img style="width:100%" src="http://api.listome.com/app/static/img/ic_checkin_record.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">打卡记录</p>
+					</a>
+				</div>
+				<div class="col-xs-4 col-sm-3 col-md-2" style="display:none;" id="samples">
+					<a href="javascript:takeSamplesForEmployee();">
+						<img style="width:100%" src="http://api.listome.com/app/static/img/ic_take_samples.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">人脸采样</p>
+					</a>
+				</div>
+				<!-- <div class="col-xs-4 col-sm-3 col-md-2">
+					<a href="#">
+						<img style="width:100%" src="/app/static/img/ic_my_salary.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">工资单</p>
+					</a>
+				</div>-->
+				<div class="col-xs-4 col-sm-3 col-md-2">
+					<a href="javascript:window.location='statistics.html'">
+						<img style="width:100%" src="/app/static/img/ic_data_statistics.png"/>
+						<p style="width:100%;text-align:center;padding-top:5px;">数据统计</p>
+					</a>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="http://api.listome.com/app/static/js/base.js?v=20151127002"></script>
+		<script type="text/javascript" src="http://api.listome.com/app/static/js/common.js"></script>
+		<script type="text/javascript">
+			getRole();
+			$('#list a').each(function(e,m){
+				$(this).bind('touchstart',function(){
+					$(this).css('background-color','rgba(126, 181, 163, 0.5)');
+				});
+				$(this).bind('touchend',function(){
+					$(this).css('background-color','');
+				})
+			});
+			if(role == 2 || role == 1){
+				$('#samples').show();
+			}else{
+				$('#samples').hide();
+			}
+		</script>
+	</body>
+</html>

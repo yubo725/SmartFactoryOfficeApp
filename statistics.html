@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>数据统计</title>
+	<script type="text/javascript" src="static/js/react.min.js"></script>
+	<script type="text/javascript" src="static/js/JSXTransformer.js"></script>
+	<script type="text/javascript" src="static/js/jquery-1.12.1.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<style type="text/css">
+		body {
+			margin: 0px;
+			padding: 0px;
+		}
+		.listItemLabel {
+			margin-left: 10px;
+			line-height: 50px;
+			font-size: 18px;
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
+		.listItemContent {
+			display: inline;
+		}
+		.divider {
+			width: 100%;
+			height: 1px;
+			background-color: #e3e3e3
+		}
+		div.listItem:active {
+			background-color: #d3d3d3;
+		}
+		.listItemImage {
+			width: 30px;
+			height: 30px;
+			float: right;
+			margin-top: 10px;
+		}
+		.listHeader {
+			width: 100%;
+			line-height: 30px;
+			background-color: #293C55;
+		}
+		.listHeaderLabel {
+			line-height: 30px;
+			margin-left: 5px;
+			color: white;
+		}
+	</style>
+</head>
+<body>
+	<script type="text/jsx">
+		React.initializeTouchEvents(true);
+		var ListItem = React.createClass({
+			render: function() {
+				return (
+					<div className="listItem" onClick={this.handleClick} onTouchStart={this.handleTouchStart} onTouchEnd={this.handleTouchEnd}>
+						<div className="listItemContent">
+							<label className="listItemLabel">{this.props.label}</label>
+							<img className="listItemImage" src="static/img/ic_right_arrow.png" />
+						</div>
+						<div className="divider"></div>
+					</div>
+				);
+			},
+			handleClick: function() {
+				var group = this.props.group;
+				var id = this.props.id;
+				var location = '';
+				if(group == 'employee') {
+					if(id == 0) {
+						location = "statistics_employee_attendance.html";
+					}else if(id == 1) {
+						location = "statistics_employee_hours.html";
+					}
+				}else if(group == 'employer'){
+					if(id == 0) {
+						location = "statistics_employer_attendance.html";
+					}else if(id == 1) {
+						location = "statistics_employer_salary.html";
+					}
+				}
+				window.location = location;
+			}
+		});
+		var List = React.createClass({
+			render: function() {
+				var items1 = [];
+				var menuStrs1 = ['本月出勤天数统计', '本月工时统计'];
+				for(var i = 0; i < menuStrs1.length; i++) {
+					items1.push(<ListItem id={i} label={menuStrs1[i]} group={"employee"}/>);
+				}
+				var items2 = [];
+				var menuStrs2 = ['整体出勤率统计', '工资统计'];
+				for(var i = 0; i < menuStrs2.length; i++) {
+					items2.push(<ListItem id={i} label={menuStrs2[i]} group={"employer"}/>);
+				}
+				return (
+					<div>
+						<div>
+							<div className="listHeader"><label className="listHeaderLabel">员工</label></div>
+							<div className="list">{items1}</div>
+						</div>
+						<div>
+							<div className="listHeader"><label className="listHeaderLabel">老板</label></div>
+							<div className="list">{items2}</div>
+						</div>
+					</div>
+				);
+			}
+		});
+		React.render(<List />, document.body);
+	</script>
+</body>
+</html>

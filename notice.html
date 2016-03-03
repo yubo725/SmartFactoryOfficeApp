@@ -1,0 +1,75 @@
+<!doctype html>
+<html ng-app="listome">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	    <title>智慧工厂</title>
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/static/bootstrap-3.3.5/css/bootstrap.min.css" />
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/app/static/js/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />
+	    <link rel="stylesheet" type="text/css" href="http://api.listome.com/app/static/css/base.css" />
+
+	    <script type="text/javascript" src="http://libs.useso.com/js/jquery/2.1.1/jquery.min.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/jquery-total-storage/jquery.total-storage.min.js"></script>
+	    
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/layer.m/layer.m.js"></script>
+	    <script type="text/javascript" src="http://api.listome.com/app/static/js/base.js"></script>
+	    <style type="text/css">
+	    i{
+	    	color:#999;
+	    }
+	    </style>
+	</head>
+	<body>
+		<div class="container" id="header" style="position:fixed;right:0;left:0;z-index:1030;">
+			<div class="row" style="margin-bottom:20px;height:50px;background-color:rgba(120,180,165,0.95);line-height:50px; color:#fff;">
+				<div class="col-xs-2">
+					<span class="glyphicon glyphicon-remove" id="close_window" style="line-height:50px;"></span>
+				</div>
+				<div class="col-xs-8 text-center" style="line-height:50px;font-weight:600;font-size:20px">
+					公司公告
+				</div>
+			</div>
+		</div>
+		<div class="container" style="padding-top:60px;">
+			<div class="row">
+				<h3 class="col-xs-12 text-center">公告标题</h3>
+				<p class="col-xs-12" style="text-indent:2em;">公告内容</p>
+			</div>
+		</div>
+		<script type="text/javascript" src="/app/static/js/common.js"></script>
+		<script type="text/javascript">
+			//获取公告内容
+			var id = getUrlParam("id")
+			$.ajax({
+				url:"/v1/companies/notices/"+id,
+				method:"GET",
+				dataType:"json",
+				beforeSend:function(request){
+					request.setRequestHeader('Authorization','Bearer '+ token);
+					layer.open({
+						type:2,
+						shade:false,
+					});
+				},
+				success:function(data){
+					layer.closeAll();
+					if (data.status == 10001){
+						$('h3').text(data.data.title)
+						$('p').text(data.data.content)
+					}else{
+						layer.open({
+						 	content: '获取公告失败',
+						    time: 2
+						});
+					}
+				},
+				error:function(r){
+					layer.closeAll();
+				}
+			});
+		</script>
+	</body>
+</html>

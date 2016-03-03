@@ -1,0 +1,239 @@
+<!doctype html>
+<html ng-app="listome">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	    <title>智慧工厂</title>
+	    <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.5/css/bootstrap.min.css" />
+	    <link rel="stylesheet" type="text/css" href="/app/static/js/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />
+	    <link rel="stylesheet" type="text/css" href="/app/static/css/base.css" />
+	    <link rel="stylesheet" type="text/css" href="/app/static/js/fullcalendar-2.4.0/fullcalendar.min.css" />
+	    <!-- <link rel="stylesheet" type="text/css" href="/app/static/js/fullcalendar-2.4.0/fullcalendar.print.css" /> -->
+
+	    <script type="text/javascript" src="http://libs.useso.com/js/jquery/2.1.1/jquery.min.js"></script>
+	    <script type="text/javascript" src="/app/static/js/moment-2.10.6/moment.min.js"></script>
+	    <script type="text/javascript" src="/app/static/js/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+	    <script type="text/javascript" src="/app/static/js/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+	    <script type="text/javascript" src="/app/static/js/fullcalendar-2.4.0/fullcalendar.min.js"></script>
+	    <script type="text/javascript" src="/app/static/js/fullcalendar-2.4.0/lang/zh-cn.js"></script>
+	    <script type="text/javascript" src="/app/static/js/layer.m/layer.m.js"></script>
+	    <script type="text/javascript" src="/app/static/js/base.js?v=20151121222"></script>
+	    <style type="text/css">
+	    i{
+	    	color:#999;
+	    }
+	    </style>
+	</head>
+	<body>
+		<div class="container" id="header" style="position:fixed;right:0;left:0;z-index:1030;">
+			<div class="row" style="margin-bottom:20px;height:50px;background-color:rgba(120,180,165,0.95);line-height:50px; color:#fff;">
+				<div class="col-xs-2">
+					<span class="glyphicon glyphicon-remove" id="close_window" style="line-height:50px;"></span>
+				</div>
+				<div class="col-xs-8 text-center" style="line-height:50px;font-weight:600;font-size:20px;">
+					打卡记录
+				</div>
+			</div>
+		</div>
+		<div class="container" style="padding-top:60px;">
+			<div class="row">
+				<div class="col-xs-12">
+					<div id="calendar"></div>
+				</div>
+			</div>
+		</div>
+		<div class="container" style="margin-top:20px;">
+			<div class="row">
+				<div class="col-xs-6 pull-left">
+					<div class="pull-left">
+						<span class="label label-danger">红色</span> 记录异常
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<div class="pull-right">
+						<span class="label label-success">绿色</span> 记录正常
+					</div>
+				</div>
+			</div>
+		</div>
+		<hr>
+		<div class="container" id="list">
+		</div>
+		<!-- <nav class="navbar navbar-default navbar-fixed-bottom">
+			<div class="container" style="margin-top:10px;">
+				<div class="btn-group btn-group-justified" role="group" aria-label="navbar">
+				&nbsp;
+			    </div>
+			</div>
+		</nav> -->
+		<script type="text/javascript" src="/app/static/js/common.js"></script>
+		<script type="text/javascript">
+
+			
+			$('.glyphicon-plus').on('click',function(){
+				$(this).css('color','#ddd');
+			});
+
+			// //底部导航
+			// function navbar(){
+			// 	if (is_boss){
+
+			// 		var html = '<a href="/app/check_record.html" class="btn btn-success" role="button">打卡记录</a>';
+			// 		$('.btn-group-justified').html(html);
+			// 	}else{
+			// 		var html = '<a href="/app/check_record.html" class="btn btn-success" role="button">打卡记录</a>';
+			// 		$('.btn-group-justified').html(html);
+			// 	}
+			// }
+			// navbar();
+
+			$('#calendar').fullCalendar({
+				lang:'zh-cn',
+				header: {
+					left: 'prev',
+					center: 'title today',
+					right: 'next'
+				},
+				height:'auto',
+				fixedWeekCount:false,
+				eventColor: 'green',
+				eventLimit: true,
+				events: function(start, end, timezone, callback) {
+			        $.ajax({
+			            url: '/v1/companies/users/checkin_records/'+start.local().unix() + "/" + (end.local().unix()-1),
+			            type:'GET',
+			            dataType: 'json',
+			            beforeSend:function(request){
+							request.setRequestHeader('Authorization','Bearer '+ token);
+							layer.open({
+								type:2,
+								shade:false,
+							});
+						},
+			            success: function(data) {
+			            	layer.closeAll();
+			                var events = [];
+			                var result = data.data
+			                for (k in result){
+			                	if (result[k].status == 0){
+				                	events.push({
+				                        title: '打卡'+result[k].count+'次',
+				                        start: k,
+				                        color: 'red'
+				                    });
+			                	}else{
+			                		events.push({
+				                        title: '打卡'+result[k].count+'次',
+				                        start: k
+				                    });
+			                	}
+			                }
+			                callback(events);
+			            }
+			        });
+    			},
+    			dayClick:function(date){
+    				$('#list').html('')
+    				var start_time = date.local().unix()
+    				var end_time = date.add(1,'days').local().unix()-1
+    				$.ajax({
+    					url:'/v1/companies/users/checkin_records',
+    					type:'GET',
+    					data:{'start_time':start_time,'end_time':end_time,'offset':0,'skip':0},
+    					dataType:'json',
+    					beforeSend:function(request){
+							request.setRequestHeader('Authorization','Bearer '+ token);
+							layer.open({
+								type:2,
+								shade:false,
+							});
+						},
+						success:function(data){
+							layer.closeAll();
+							var html = '';
+							var result = data.data.list
+							if(result.length > 0){
+								html += '<div class="row" style="border-bottom:1px solid #ccc;margin-bottom:10px;">';
+								html += '<div class="col-xs-8">时间</div>';
+								html += '<div class="col-xs-4">状态</div>';
+								html += '</div>';
+							}	
+							
+							for (k in result){
+								html += '<div class="row" style="margin-bottom:10px;">';
+								html += '<div class="col-xs-8">'+unixToTime('yyyy-MM-dd hh:mm',result[k].check_time)+'</div>';
+								// switch(result[k].status){
+								// 	case 1:
+								// 	case 3:
+								// 		html += '<div class="col-xs-4"><span class="btn btn-success btn-xs">正常</span></div>';
+								// 		break;
+								// 	case -1:
+								// 		html += '<div class="col-xs-4"><span class="btn btn-info btn-xs">迟到</span></div>';
+								// 		break;
+								// 	case -2:
+								// 		html += '<div class="col-xs-4"><span class="btn btn-warning btn-xs">早退</span></div>';
+								// 		break;
+								// }
+								html += '<div class="col-xs-4"><span class="btn btn-success btn-xs">正常</span></div>';
+								html += '</div>';
+							}
+							$('#list').html(html);
+						}
+    				});
+    			}
+			});
+			function getTodayCheckinRecord(){
+				var start = moment(moment().format("YYYY-MM-DD"));
+				var start_time = start.local().unix();
+				var end_time = start.add(1,'days').local().unix()-1;
+				console.log("start=>",start_time,"end=>",end_time);
+				$.ajax({
+    					url:'/v1/companies/users/checkin_records',
+    					type:'GET',
+    					data:{'start_time':start_time,'end_time':end_time,'offset':0,'skip':0},
+    					dataType:'json',
+    					beforeSend:function(request){
+							request.setRequestHeader('Authorization','Bearer '+ token);
+							layer.open({
+								type:2,
+								shade:false,
+							});
+						},
+						success:function(data){
+							layer.closeAll();
+							var html = '';
+							var result = data.data.list
+							if(result.length > 0){
+								html += '<div class="row" style="border-bottom:1px solid #ccc;margin-bottom:10px;">';
+								html += '<div class="col-xs-8">时间</div>';
+								html += '<div class="col-xs-4">状态</div>';
+								html += '</div>';
+							}	
+							
+							for (k in result){
+								html += '<div class="row" style="margin-bottom:10px;">';
+								html += '<div class="col-xs-8">'+unixToTime('yyyy-MM-dd hh:mm',result[k].check_time)+'</div>';
+								switch(result[k].status){
+									case 1:
+									case 3:
+										html += '<div class="col-xs-4"><span class="btn btn-success btn-xs">正常</span></div>';
+										break;
+									case -1:
+										html += '<div class="col-xs-4"><span class="btn btn-info btn-xs">迟到</span></div>';
+										break;
+									case -2:
+										html += '<div class="col-xs-4"><span class="btn btn-warning btn-xs">早退</span></div>';
+										break;
+								}
+								html += '</div>';
+							}
+							$('#list').html(html);
+						}
+    				});
+			}
+			getTodayCheckinRecord();
+		</script>
+	</body>
+	<script></script>
+</html>
